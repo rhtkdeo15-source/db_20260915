@@ -1,0 +1,90 @@
+-- STUDENT, ENROL, SUBJECT 
+SELECT * FROM STUDENT;
+SELECT * FROM ENROL;
+SELECT * FROM SUBJECT;
+-- 1. 성이 '김'씨인 학생들의 학번, 이름, 학과를 출력하시오.
+SELECT 
+    STU_NO,STU_NAME, STU_DEPT
+FROM STUDENT
+WHERE STU_NAME LIKE '김%';
+-- 2. 15학번 학생들의 학번, 이름, 학과를 출력하시오.(학번 3,4번째 숫자 15)
+SELECT 
+    SUBSTR(STU_NO,3,2),STU_NAME, STU_DEPT
+FROM STUDENT
+WHERE SUBSTR(STU_NO,3,2) = 15;
+-- 3. 컴퓨터정보 학과 학생들의 시험 평균 점수를 구하시오.
+SELECT 
+    STU_DEPT,AVG(ENR_GRADE)
+FROM STUDENT S
+INNER JOIN ENROL E ON S.STU_NO = E.STU_NO
+GROUP BY STU_DEPT
+HAVING STU_DEPT = '컴퓨터정보';
+-- 4. 컴퓨터개론 수업을 듣는 학생의 학번, 이름, 학과, 시험점수를 구하시오.
+SELECT 
+    S.STU_NO, S.STU_NAME, S.STU_DEPT, E.ENR_GRADE
+FROM STUDENT S
+INNER JOIN ENROL E ON S.STU_NO = E.STU_NO
+INNER JOIN SUBJECT SUB ON E.SUB_NO = SUB.SUB_NO
+WHERE SUB_NAME = '컴퓨터개론';
+-- 5. 학생들의 전체 평균 키보다 큰 키를 가진 학생들의 학번, 이름, 키를 출력하시오.
+SELECT 
+    STU_NO, STU_NAME, STU_HEIGHT
+FROM STUDENT
+WHERE STU_HEIGHT > (
+    SELECT
+        AVG(STU_HEIGHT)
+    FROM STUDENT
+);
+-- 6. 본인 학과의 평균 키보다 큰 학생들의 이름, 학과, 키, 학과 평균키 값 출력
+SELECT 
+    STU_DEPT,AVG(STU_HEIGHT)AS DEPT_HEIGHT
+FROM STUDENT
+GROUP BY STU_DEPT;
+
+SELECT STU_NO, STU_NAME, S.STU_DEPT, STU_HEIGHT, DEPT_HEIGHT
+FROM STUDENT S
+INNER JOIN (
+    SELECT 
+        STU_DEPT,AVG(STU_HEIGHT)AS DEPT_HEIGHT
+    FROM STUDENT
+    GROUP BY STU_DEPT
+) T ON S.STU_DEPT = T.STU_DEPT
+WHERE STU_HEIGHT > DEPT_HEIGHT;
+-- 7. 컴퓨터정보과의 평균보다 평균이 낮은 학과의 학과명, 점수 출력
+SELECT 
+    STU_DEPT, AVG(ENR_GRADE) AS AVG_GRADE
+FROM STUDENT S
+INNER JOIN ENROL E ON S.STU_NO = E.STU_NO
+WHERE STU_DEPT = '컴퓨터정보'
+GROUP BY STU_DEPT;
+
+SELECT STU_DEPT, AVG(ENR_GRADE) AS AVG_GRADE
+FROM STUDENT S
+INNER JOIN ENROL E ON S.STU_NO = E.STU_NO
+GROUP BY S.STU_DEPT
+HAVING AVG(ENR_GRADE) < (
+    SELECT 
+        AVG(ENR_GRADE)
+    FROM STUDENT S
+    INNER JOIN ENROL E ON S.STU_NO = E.STU_NO
+    WHERE S.STU_DEPT = '컴퓨터정보'
+);
+-- EMP, SALGRADE, DEPT
+SELECT * FROM EMP;
+SELECT * FROM SALGRADE;
+SELECT * FROM DEPT;
+-- 1. 사번, 이름, 팀장(MGR)의 이름을 출력하시오.
+-- 2. 부서별 가장 높은 급여를 받는 사원의 사번, 이름, 급여, 부서명을 출력하시오.
+-- 3. 입사년도가 1981년도인 사원들의 급여 총합을 구하시오.
+-- 4. 직급별 급여의 합이 가장 큰 직급의 직급명, 급여의 합을 출력하시오.
+-- 5. ALLEN과 같은 JOB, DEPTNO(부서)를 가진 사람을 구하시오.(ENAME, DNAME 출력)
+
+-- STU, PROFESSOR, DEPARTMENT
+-- 1. 남자이면서(주민번호 7번째자리 1) 공과대학에 속한 학생의 수를 구하시오.
+-- 2. 보너스+급여가 400 이하인 교수들의 이름, 아이디, 학과명을 출력하시오.
+-- 3. 담당 학생이 2명이상인 교수의 이름, 아이디, 담당학생 수를 출력하시오.
+-- 4. 가장 많은 학생이 있는 학과와 가장 적은 학생이 있는 학과의 학과명, 학생수를 출력하시오.
+--## 이전반 시험문제
+
+--본인보다 높은 학년인 사람의 학생 수 구하고, 아래 이미지와 같이 결과를 도출하시오.
+--(사용 테이블 : STU)
