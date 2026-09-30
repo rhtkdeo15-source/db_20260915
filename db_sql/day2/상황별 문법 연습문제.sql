@@ -9,7 +9,7 @@ FROM STUDENT
 WHERE STU_NAME LIKE '김%';
 -- 2. 15학번 학생들의 학번, 이름, 학과를 출력하시오.(학번 3,4번째 숫자 15)
 SELECT 
-    SUBSTR(STU_NO,3,2),STU_NAME, STU_DEPT
+    STU_NO,STU_NAME, STU_DEPT
 FROM STUDENT
 WHERE SUBSTR(STU_NO,3,2) = 15;
 -- 3. 컴퓨터정보 학과 학생들의 시험 평균 점수를 구하시오.
@@ -74,17 +74,92 @@ SELECT * FROM EMP;
 SELECT * FROM SALGRADE;
 SELECT * FROM DEPT;
 -- 1. 사번, 이름, 팀장(MGR)의 이름을 출력하시오.
+SELECT 
+    E1.EMPNO, E1.ENAME, E2.ENAME
+FROM EMP E1
+INNER JOIN EMP E2 ON E1.MGR = E2.EMPNO;
 -- 2. 부서별 가장 높은 급여를 받는 사원의 사번, 이름, 급여, 부서명을 출력하시오.
--- 3. 입사년도가 1981년도인 사원들의 급여 총합을 구하시오.
--- 4. 직급별 급여의 합이 가장 큰 직급의 직급명, 급여의 합을 출력하시오.
--- 5. ALLEN과 같은 JOB, DEPTNO(부서)를 가진 사람을 구하시오.(ENAME, DNAME 출력)
+SELECT 
+    MAX(SAL),DEPTNO
+FROM EMP
+GROUP BY DEPTNO;
 
+SELECT 
+    EMPNO,ENAME,SAL,DEPTNO
+FROM EMP
+WHERE (SAL, DEPTNO)IN (
+    SELECT 
+    MAX(SAL),DEPTNO
+FROM EMP
+GROUP BY DEPTNO
+);
+-- 3. 입사년도가 1981년도인 사원들의 급여 총합을 구하시오.
+SELECT
+    SUM(SAL)
+FROM EMP
+WHERE TO_CHAR(HIREDATE,'YY') = '81';
+-- 4. 직급별 급여의 합이 가장 큰 직급의 직급명, 급여의 합을 출력하시오.
+SELECT JOB, SUM(SAL) JOB_SAL
+FROM EMP
+GROUP BY JOB
+HAVING SUM(SAL) = (
+    SELECT MAX(JOB_SAL)
+    FROM(
+        SELECT JOB, SUM(SAL) JOB_SAL
+        FROM EMP
+        GROUP BY JOB
+    )
+);
+-- 5. ALLEN과 같은 JOB, DEPTNO(부서)를 가진 사람을 구하시오.(ENAME, DNAME 출력)
+SELECT JOB, DEPTNO
+FROM EMP
+WHERE ENAME = 'ALLEN';
+
+SELECT *
+FROM EMP
+WHERE (JOB,ENAME) IN(
+    SELECT JOB, DEPTNO
+FROM EMP
+WHERE ENAME = 'ALLEN'
+)AND ENAME !='ALLEN';
 -- STU, PROFESSOR, DEPARTMENT
+SELECT * FROM STU;
+SELECT * FROM PROFESSOR;
+SELECT * FROM DEPARTMENT;
 -- 1. 남자이면서(주민번호 7번째자리 1) 공과대학에 속한 학생의 수를 구하시오.
+SELECT COUNT(*)
+FROM STU S
+INNER JOIN DEPARTMENT D1 ON S.DEPTNO1 = D1.DEPTNO
+INNER JOIN DEPARTMENT D2 ON D1.PART = D2.DEPTNO
+INNER JOIN DEPARTMENT D3 ON D2.PART = D3.DEPTNO
+WHERE SUBSTR(JUMIN,7,1) = 1;
+
 -- 2. 보너스+급여가 400 이하인 교수들의 이름, 아이디, 학과명을 출력하시오.
+SELECT *
+FROM PROFESSOR P
+INNER JOIN DEPARTMENT D ON P.DEPTNO = D.DEPTNO
+WHERE PAY = NVL(BOUNS, 0) <= 400 ;
 -- 3. 담당 학생이 2명이상인 교수의 이름, 아이디, 담당학생 수를 출력하시오.
+SELECT P.NAME, P.ID, COUNT(*)
+FROM PROFESSOR P
+INNER JOIN STU S ON P.PROFNO = S.PROFNO
+GROUP BY P.PROFNO,P.NAME, P.ID
+HAVING COUNT(*) >= 2;
 -- 4. 가장 많은 학생이 있는 학과와 가장 적은 학생이 있는 학과의 학과명, 학생수를 출력하시오.
+SELECT MAX(DEPT_COUNT) AS MAX_COUNT, MIN(DEPT_COUNT) AS MIN_COUNT
+FROM(
+    SELECT D.DEPTNO, COUNT(*) AS DEPT_COUNT
+    FROM STU S
+    INNER JOIN DEPARTMENT D ON S.DEPTNO1 = D.DEPTNO
+    GROUP BY D.DEPTNO
+);
+
+
 --## 이전반 시험문제
 
 --본인보다 높은 학년인 사람의 학생 수 구하고, 아래 이미지와 같이 결과를 도출하시오.
+SELECT S1.NAME,COUNT(S2.STUNO)
+FROM STU S1
+LEFT JOIN STU S2 ON S1.GRADE < S2.GRADE
+GROUP BY S1.NAME
 --(사용 테이블 : STU)
